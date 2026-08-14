@@ -15,18 +15,56 @@ MOCK_EXAMS = {
     "2026-11-19": "대학수학능력시험" 
 }
 
-# --- 전체 선택/해제 동기화 함수 ---
+# --- 3단계(글로벌 ↔ 학교 ↔ 개별일정) 양방향 동기화 콜백 함수 ---
 def toggle_high_schools():
-    is_checked = st.session_state.show_high
+    val = st.session_state.show_high
     for ev in st.session_state.events:
         if ev['name'].endswith('고'):
-            st.session_state[f"chk_{ev['id']}"] = is_checked
+            st.session_state[f"chk_{ev['id']}"] = val
+            st.session_state[f"master_{ev['name']}"] = val
 
 def toggle_mid_schools():
-    is_checked = st.session_state.show_mid
+    val = st.session_state.show_mid
     for ev in st.session_state.events:
         if ev['name'].endswith('중'):
-            st.session_state[f"chk_{ev['id']}"] = is_checked
+            st.session_state[f"chk_{ev['id']}"] = val
+            st.session_state[f"master_{ev['name']}"] = val
+
+def toggle_school(s_name, is_high):
+    val = st.session_state[f"master_{s_name}"]
+    for ev in st.session_state.events:
+        if ev['name'] == s_name:
+            st.session_state[f"chk_{ev['id']}"] = val
+    
+    # 상위(글로벌) 체크박스 상태 자동 업데이트
+    all_global = True
+    for ev in st.session_state.events:
+        if (is_high and ev['name'].endswith('고')) or (not is_high and ev['name'].endswith('중')):
+            if not st.session_state.get(f"chk_{ev['id']}", True):
+                all_global = False
+                break
+    if is_high: st.session_state.show_high = all_global
+    else: st.session_state.show_mid = all_global
+
+def toggle_individual(s_name, is_high):
+    # 상위(학교 마스터) 체크박스 상태 자동 업데이트
+    all_school = True
+    for ev in st.session_state.events:
+        if ev['name'] == s_name:
+            if not st.session_state.get(f"chk_{ev['id']}", True):
+                all_school = False
+                break
+    st.session_state[f"master_{s_name}"] = all_school
+    
+    # 최상위(글로벌) 체크박스 상태 자동 업데이트
+    all_global = True
+    for ev in st.session_state.events:
+        if (is_high and ev['name'].endswith('고')) or (not is_high and ev['name'].endswith('중')):
+            if not st.session_state.get(f"chk_{ev['id']}", True):
+                all_global = False
+                break
+    if is_high: st.session_state.show_high = all_global
+    else: st.session_state.show_mid = all_global
 
 # --- 상태 및 기본 데이터 초기화 ---
 if 'show_high' not in st.session_state: st.session_state.show_high = True
@@ -37,7 +75,6 @@ if 'cal_start_val' not in st.session_state: st.session_state.cal_start_val = dat
 
 if 'events' not in st.session_state:
     st.session_state.events = [
-        # 고등학교
         {"id": str(uuid.uuid4()), "name": "경산고", "color": "#E2D0F9", "type": "중간고사", "start_date": date(2026, 9, 30), "end_date": date(2026, 10, 2)},
         {"id": str(uuid.uuid4()), "name": "경산고", "color": "#E2D0F9", "type": "기말고사", "start_date": date(2026, 12, 1), "end_date": date(2026, 12, 4)},
         {"id": str(uuid.uuid4()), "name": "경산여고", "color": "#FFF2CC", "type": "중간고사", "start_date": date(2026, 9, 28), "end_date": date(2026, 10, 1)},
@@ -52,7 +89,7 @@ if 'events' not in st.session_state:
         {"id": str(uuid.uuid4()), "name": "청도고", "color": "#C9DAF8", "type": "기말고사", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 18)},
         {"id": str(uuid.uuid4()), "name": "하양여고", "color": "#D9EAD3", "type": "중간고사", "start_date": date(2026, 10, 13), "end_date": date(2026, 10, 16)},
         {"id": str(uuid.uuid4()), "name": "하양여고", "color": "#D9EAD3", "type": "기말고사", "start_date": date(2026, 12, 3), "end_date": date(2026, 12, 8)},
-        # 중학교 (경산중 기존 데이터 유지)
+        # 중학교
         {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "중간고사", "start_date": date(2026, 9, 28), "end_date": date(2026, 9, 30)},
         {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사(중3)", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
         {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)},
@@ -78,17 +115,16 @@ if 'events' not in st.session_state:
         {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사(중3)", "start_date": date(2026, 11, 10), "end_date": date(2026, 11, 12)},
         {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)}
     ]
-    # 최초 실행 시 모든 학교 개별 체크
-    for ev in st.session_state.events:
+
+# 개별 및 마스터 체크박스 키 초기화
+for ev in st.session_state.events:
+    if f"chk_{ev['id']}" not in st.session_state:
         st.session_state[f"chk_{ev['id']}"] = True
+    if f"master_{ev['name']}" not in st.session_state:
+        st.session_state[f"master_{ev['name']}"] = True
 
 if 'selected_color' not in st.session_state:
     st.session_state.selected_color = "#FFF2CC"
-
-def delete_event(target_id):
-    st.session_state.events = [e for e in st.session_state.events if e['id'] != target_id]
-    if f"chk_{target_id}" in st.session_state:
-        del st.session_state[f"chk_{target_id}"]
 
 def is_event_visible(ev):
     return st.session_state.get(f"chk_{ev['id']}", True)
@@ -159,13 +195,14 @@ with add_col2:
                 "type": exam_type, "start_date": start_date, "end_date": end_date
             })
             st.session_state[f"chk_{new_id}"] = True
+            st.session_state[f"master_{school_name}"] = True
             st.success(f"[{school_name}] 일정 추가 완료!")
         else:
             st.warning("시작일과 종료일을 모두 선택해 주세요.")
 
 st.divider()
 
-# --- 하단 글로벌 필터 및 목록 관리 (정렬 표 개편) ---
+# --- 하단 글로벌 필터 및 목록 관리 ---
 c_hdr, c_high, c_mid, c_mock = st.columns([3, 1.5, 1.5, 2])
 with c_hdr:
     st.subheader("📋 전체 등록된 학교 시험 일정")
@@ -198,26 +235,16 @@ if st.session_state.events:
     high_schools = {k: v for k, v in schools.items() if k.endswith('고')}
     mid_schools = {k: v for k, v in schools.items() if k.endswith('중')}
 
-    # 표 행(Row) 생성 공통 함수
     def render_school_row(s_name, ev_list, is_middle=False):
-        # 0.3:체크박스, 1.5:학교명, 0.8:빈칸(여백), 2.5:중간, 0.8:빈칸(여백), 2.5:기말, 0.6:빈칸, 1.0:삭제
         if is_middle:
             cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
         else:
             cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
             
-        all_checked = all(st.session_state.get(f"chk_{ev['id']}", True) for ev in ev_list)
-        
-        def toggle_school_callback(name=s_name):
-            new_state = st.session_state[f"master_{name}"]
-            for ev in st.session_state.events:
-                if ev['name'] == name:
-                    st.session_state[f"chk_{ev['id']}"] = new_state
-        
-        # 1. 일괄 체크박스
+        # 1. 일괄 체크박스 (on_change 연결)
         with cols[0]:
             st.markdown("<div style='margin-top: 14px;'>", unsafe_allow_html=True)
-            st.checkbox("", value=all_checked, key=f"master_{s_name}", on_change=toggle_school_callback, label_visibility="collapsed")
+            st.checkbox("", key=f"master_{s_name}", on_change=toggle_school, args=(s_name, not is_middle), label_visibility="collapsed")
             st.markdown("</div>", unsafe_allow_html=True)
             
         # 2. 학교 이름 배지
@@ -225,13 +252,13 @@ if st.session_state.events:
             color = ev_list[0]['color']
             st.markdown(f"<div style='background-color:{color}; padding: 6px; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 8px; color: black;'>{s_name}</div>", unsafe_allow_html=True)
         
-        # 3. 일정 렌더링 함수
+        # 3. 일정 렌더링 함수 (on_change 연결)
         def draw_event_col(col_idx, ev_type_match):
             ev_match = next((e for e in ev_list if e['type'] == ev_type_match or (ev_type_match=='기말고사' and e['type'] in ['기말고사', '기말고사(중3)', '기말고사(중1,2)'] and not is_middle)), None)
             if ev_match:
                 with cols[col_idx]:
                     st.markdown("<div style='margin-top: 6px;'>", unsafe_allow_html=True)
-                    st.checkbox(format_date_str(ev_match), value=st.session_state.get(f"chk_{ev_match['id']}", True), key=f"chk_{ev_match['id']}")
+                    st.checkbox(format_date_str(ev_match), key=f"chk_{ev_match['id']}", on_change=toggle_individual, args=(s_name, not is_middle))
                     st.markdown("</div>", unsafe_allow_html=True)
         
         if is_middle:
@@ -252,7 +279,7 @@ if st.session_state.events:
             st.button("삭제", key=f"del_{s_name}", on_click=delete_school_callback)
             st.markdown("</div>", unsafe_allow_html=True)
             
-        # 5. 각 학교별 구분선 (연한 회색)
+        # 5. 각 학교별 구분선
         st.markdown("<hr style='margin: 8px 0; border: 0; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
 
     # --- 고등학교 표 그리기 ---
@@ -260,8 +287,9 @@ if st.session_state.events:
         st.markdown("<br>", unsafe_allow_html=True)
         h_cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
         h_cols[1].markdown("<div style='text-align: center; color: #555;'><b>고등학교</b></div>", unsafe_allow_html=True)
-        h_cols[3].markdown("<div style='color: #555; padding-left: 5px;'><b>중간고사</b></div>", unsafe_allow_html=True)
-        h_cols[5].markdown("<div style='color: #555; padding-left: 5px;'><b>기말고사</b></div>", unsafe_allow_html=True)
+        # 글자를 오른쪽으로 28px 당겨 정렬 맞춤
+        h_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
+        h_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사</b></div>", unsafe_allow_html=True)
         h_cols[7].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
         st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
         
@@ -273,9 +301,10 @@ if st.session_state.events:
         st.markdown("<br>", unsafe_allow_html=True)
         m_cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
         m_cols[1].markdown("<div style='text-align: center; color: #555;'><b>중학교</b></div>", unsafe_allow_html=True)
-        m_cols[3].markdown("<div style='color: #555; padding-left: 5px;'><b>중간고사</b></div>", unsafe_allow_html=True)
-        m_cols[5].markdown("<div style='color: #555; padding-left: 5px;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
-        m_cols[7].markdown("<div style='color: #555; padding-left: 5px;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
+        # 글자를 오른쪽으로 28px 당겨 정렬 맞춤
+        m_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
+        m_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
+        m_cols[7].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
         m_cols[9].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
         st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
         
