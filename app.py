@@ -52,42 +52,38 @@ if 'events' not in st.session_state:
         {"id": str(uuid.uuid4()), "name": "청도고", "color": "#C9DAF8", "type": "기말고사", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 18)},
         {"id": str(uuid.uuid4()), "name": "하양여고", "color": "#D9EAD3", "type": "중간고사", "start_date": date(2026, 10, 13), "end_date": date(2026, 10, 16)},
         {"id": str(uuid.uuid4()), "name": "하양여고", "color": "#D9EAD3", "type": "기말고사", "start_date": date(2026, 12, 3), "end_date": date(2026, 12, 8)},
-        # 중학교
+        # 중학교 (기말고사를 학년별로 명확히 분리)
         {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "중간고사", "start_date": date(2026, 9, 28), "end_date": date(2026, 9, 30)},
-        {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
-        {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)},
+        {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사(중3)", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
+        {"id": str(uuid.uuid4()), "name": "경산중", "color": "#B6D7A8", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)},
         {"id": str(uuid.uuid4()), "name": "경산여중", "color": "#FFF9E6", "type": "중간고사", "start_date": date(2026, 9, 29), "end_date": date(2026, 10, 1)},
-        {"id": str(uuid.uuid4()), "name": "경산여중", "color": "#FFF9E6", "type": "기말고사", "start_date": date(2026, 11, 10), "end_date": date(2026, 11, 12)},
-        {"id": str(uuid.uuid4()), "name": "경산여중", "color": "#FFF9E6", "type": "기말고사", "start_date": date(2026, 12, 2), "end_date": date(2026, 12, 4)},
+        {"id": str(uuid.uuid4()), "name": "경산여중", "color": "#FFF9E6", "type": "기말고사(중3)", "start_date": date(2026, 11, 10), "end_date": date(2026, 11, 12)},
+        {"id": str(uuid.uuid4()), "name": "경산여중", "color": "#FFF9E6", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 2), "end_date": date(2026, 12, 4)},
         {"id": str(uuid.uuid4()), "name": "덕원중", "color": "#EFEFEF", "type": "중간고사", "start_date": date(2026, 9, 29), "end_date": date(2026, 9, 30)},
-        {"id": str(uuid.uuid4()), "name": "덕원중", "color": "#EFEFEF", "type": "기말고사", "start_date": date(2026, 11, 2), "end_date": date(2026, 11, 4)},
-        {"id": str(uuid.uuid4()), "name": "덕원중", "color": "#EFEFEF", "type": "기말고사", "start_date": date(2026, 12, 8), "end_date": date(2026, 12, 10)},
+        {"id": str(uuid.uuid4()), "name": "덕원중", "color": "#EFEFEF", "type": "기말고사(중3)", "start_date": date(2026, 11, 2), "end_date": date(2026, 11, 4)},
+        {"id": str(uuid.uuid4()), "name": "덕원중", "color": "#EFEFEF", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 8), "end_date": date(2026, 12, 10)},
         {"id": str(uuid.uuid4()), "name": "문명중", "color": "#FCE5CD", "type": "중간고사", "start_date": date(2026, 10, 13), "end_date": date(2026, 10, 15)},
-        {"id": str(uuid.uuid4()), "name": "문명중", "color": "#FCE5CD", "type": "기말고사", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
-        {"id": str(uuid.uuid4()), "name": "문명중", "color": "#FCE5CD", "type": "기말고사", "start_date": date(2026, 12, 11), "end_date": date(2026, 12, 15)},
+        {"id": str(uuid.uuid4()), "name": "문명중", "color": "#FCE5CD", "type": "기말고사(중3)", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
+        {"id": str(uuid.uuid4()), "name": "문명중", "color": "#FCE5CD", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 11), "end_date": date(2026, 12, 15)},
         {"id": str(uuid.uuid4()), "name": "사동중", "color": "#E2D0F9", "type": "중간고사", "start_date": date(2026, 9, 30), "end_date": date(2026, 10, 2)},
-        {"id": str(uuid.uuid4()), "name": "사동중", "color": "#E2D0F9", "type": "기말고사", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
-        {"id": str(uuid.uuid4()), "name": "사동중", "color": "#E2D0F9", "type": "기말고사", "start_date": date(2026, 12, 7), "end_date": date(2026, 12, 9)},
+        {"id": str(uuid.uuid4()), "name": "사동중", "color": "#E2D0F9", "type": "기말고사(중3)", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
+        {"id": str(uuid.uuid4()), "name": "사동중", "color": "#E2D0F9", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 7), "end_date": date(2026, 12, 9)},
         {"id": str(uuid.uuid4()), "name": "삼성현중", "color": "#C9DAF8", "type": "중간고사", "start_date": date(2026, 9, 29), "end_date": date(2026, 10, 1)},
-        {"id": str(uuid.uuid4()), "name": "삼성현중", "color": "#C9DAF8", "type": "기말고사", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
-        {"id": str(uuid.uuid4()), "name": "삼성현중", "color": "#C9DAF8", "type": "기말고사", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 17)},
+        {"id": str(uuid.uuid4()), "name": "삼성현중", "color": "#C9DAF8", "type": "기말고사(중3)", "start_date": date(2026, 11, 16), "end_date": date(2026, 11, 18)},
+        {"id": str(uuid.uuid4()), "name": "삼성현중", "color": "#C9DAF8", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 17)},
         {"id": str(uuid.uuid4()), "name": "시지중", "color": "#F4CCCC", "type": "중간고사", "start_date": date(2026, 10, 26), "end_date": date(2026, 10, 27)},
-        {"id": str(uuid.uuid4()), "name": "시지중", "color": "#F4CCCC", "type": "기말고사", "start_date": date(2026, 10, 26), "end_date": date(2026, 10, 28)},
-        {"id": str(uuid.uuid4()), "name": "시지중", "color": "#F4CCCC", "type": "기말고사", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 17)},
+        {"id": str(uuid.uuid4()), "name": "시지중", "color": "#F4CCCC", "type": "기말고사(중3)", "start_date": date(2026, 10, 26), "end_date": date(2026, 10, 28)},
+        {"id": str(uuid.uuid4()), "name": "시지중", "color": "#F4CCCC", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 15), "end_date": date(2026, 12, 17)},
         {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "중간고사", "start_date": date(2026, 9, 29), "end_date": date(2026, 10, 1)},
-        {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사", "start_date": date(2026, 11, 10), "end_date": date(2026, 11, 12)},
-        {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)}
+        {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사(중3)", "start_date": date(2026, 11, 10), "end_date": date(2026, 11, 12)},
+        {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)}
     ]
+    # 최초 실행 시 모든 학교 개별 체크
     for ev in st.session_state.events:
         st.session_state[f"chk_{ev['id']}"] = True
 
 if 'selected_color' not in st.session_state:
     st.session_state.selected_color = "#FFF2CC"
-
-def delete_event(target_id):
-    st.session_state.events = [e for e in st.session_state.events if e['id'] != target_id]
-    if f"chk_{target_id}" in st.session_state:
-        del st.session_state[f"chk_{target_id}"]
 
 def is_event_visible(ev):
     return st.session_state.get(f"chk_{ev['id']}", True)
@@ -98,24 +94,18 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# === 상단 여백 극한 축소 및 인쇄 페이지 넘김(Ctrl+Enter) CSS ===
+# === 상단 여백 및 인쇄용 페이지 넘김 CSS ===
 st.markdown("""
     <style>
-        /* 웹 화면용 상단 여백 완벽 제거 */
         .block-container { 
             padding-top: 0rem !important; 
             margin-top: 0rem !important;
         }
-        header { display: none !important; } /* 보이지 않는 투명 헤더 영역 삭제 */
+        header { display: none !important; }
         
-        /* 인쇄 전용 설정 */
         @media print {
-            @page { margin-top: 10mm; } /* 브라우저 기본 인쇄 여백 10mm로 고정 (필요시 조절) */
-            
-            /* 이 클래스가 붙은 곳부터 다음 장으로 무조건 넘깁니다 */
-            .page-break { 
-                page-break-before: always !important; 
-            }
+            @page { margin-top: 10mm; }
+            .page-break { page-break-before: always !important; }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -123,12 +113,11 @@ st.markdown("""
 # === [맨 위] 출력용 달력이 들어갈 컨테이너 ===
 cal_container = st.empty() 
 
-# 인쇄 시 여기서 다음 장(2페이지)으로 넘어갑니다 (구분선 포함)
+# ----------------- 인쇄 시 여기서 다음 장(2페이지)으로 넘어감 -----------------
 st.markdown("<div class='page-break'><hr style='margin-top:20px; margin-bottom:20px;'></div>", unsafe_allow_html=True)
 
-# === [아래] 설정 및 입력 기능 (여기부터는 인쇄 시 2페이지로 넘어감) ===
+# === [아래] 설정 및 입력 기능 ===
 st.subheader("⚙️ 달력 설정 및 일정 추가")
-
 calendar_title = st.text_input("출력용 달력 제목을 입력하세요", "2026 2학기 학교별 시험 일정")
 
 cal_col1, cal_col2 = st.columns([1, 1])
@@ -142,7 +131,8 @@ st.markdown("<br>", unsafe_allow_html=True)
 add_col1, add_col2 = st.columns([1, 1])
 with add_col1:
     school_name = st.text_input("새로운 학교 이름을 입력하세요", "사동고")
-    exam_type = st.radio("시험 종류", ["중간고사", "기말고사"], horizontal=True)
+    # 중/고등학교 모두 대응 가능한 시험 종류 선택기
+    exam_type = st.radio("시험 종류", ["중간고사", "기말고사", "기말고사(중3)", "기말고사(중1,2)"], horizontal=True)
     
     with st.popover("🎨 색상 팔레트 열기 (클릭)"):
         st.write("▼ 아래 실제 색상을 확인하고 고르세요")
@@ -175,7 +165,7 @@ with add_col2:
 
 st.divider()
 
-# --- 하단 글로벌 필터 및 목록 관리 ---
+# --- 하단 글로벌 필터 및 목록 관리 (표 형태 개편) ---
 c_hdr, c_high, c_mid, c_mock = st.columns([3, 1.5, 1.5, 2])
 with c_hdr:
     st.subheader("📋 전체 등록된 학교 시험 일정")
@@ -196,21 +186,97 @@ if st.session_state.events:
     def get_weekday_kr(d):
         return ["월", "화", "수", "목", "금", "토", "일"][d.weekday()]
 
+    def format_date_str(ev):
+        start_str = f"{ev['start_date'].strftime('%Y-%m-%d')}({get_weekday_kr(ev['start_date'])})"
+        end_str = f"{ev['end_date'].strftime('%m-%d')}({get_weekday_kr(ev['end_date'])})"
+        return f"{start_str} ~ {end_str}"
+
+    # 학교별로 그룹화
+    schools = {}
     for ev in st.session_state.events:
-        c1, c2, c3, c4 = st.columns([1.5, 3.5, 1, 1])
-        with c1:
-            st.markdown(f"<div style='background-color:{ev['color']}; padding: 5px; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 5px; color: black;'>{ev['name']}</div>", unsafe_allow_html=True)
-        with c2:
-            start_str = f"{ev['start_date'].strftime('%Y-%m-%d')}({get_weekday_kr(ev['start_date'])})"
-            end_str = f"{ev['end_date'].strftime('%m-%d')}({get_weekday_kr(ev['end_date'])})"
-            exam_type_str = f"[{ev.get('type', '')}] " if ev.get('type') else ""
-            st.markdown(f"<p style='margin-top: 8px;'>{exam_type_str}{start_str} ~ {end_str}</p>", unsafe_allow_html=True)
-        with c3:
-            st.checkbox("달력 표시", key=f"chk_{ev['id']}")
-        with c4:
-            st.button("삭제", key=f"btn_del_{ev['id']}", on_click=delete_event, args=(ev['id'],))
+        schools.setdefault(ev['name'], []).append(ev)
+        
+    high_schools = {k: v for k, v in schools.items() if k.endswith('고')}
+    mid_schools = {k: v for k, v in schools.items() if k.endswith('중')}
+
+    # 공통 학교 렌더링 함수
+    def render_school_row(s_name, ev_list, is_middle=False):
+        if is_middle:
+            cols = st.columns([0.5, 1.5, 2.5, 2.5, 2.5, 1])
+        else:
+            cols = st.columns([0.5, 1.5, 3, 3, 1])
+            
+        all_checked = all(st.session_state.get(f"chk_{ev['id']}", True) for ev in ev_list)
+        
+        # 해당 학교의 모든 일정을 일괄 선택/해제하는 함수
+        def toggle_school_callback(name=s_name):
+            new_state = st.session_state[f"master_{name}"]
+            for ev in st.session_state.events:
+                if ev['name'] == name:
+                    st.session_state[f"chk_{ev['id']}"] = new_state
+        
+        with cols[0]:
+            st.markdown("<div style='margin-top: 12px;'>", unsafe_allow_html=True)
+            st.checkbox("", value=all_checked, key=f"master_{s_name}", on_change=toggle_school_callback, label_visibility="collapsed")
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        with cols[1]:
+            color = ev_list[0]['color']
+            st.markdown(f"<div style='background-color:{color}; padding: 6px; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 8px; color: black;'>{s_name}</div>", unsafe_allow_html=True)
+        
+        def draw_event_col(col_idx, ev_type_match):
+            # 해당하는 시험 유형의 데이터 찾기
+            ev_match = next((e for e in ev_list if e['type'] == ev_type_match or (ev_type_match=='기말고사' and e['type'] in ['기말고사', '기말고사(중3)', '기말고사(중1,2)'] and not is_middle)), None)
+            if ev_match:
+                with cols[col_idx]:
+                    st.markdown("<div style='margin-top: 6px;'>", unsafe_allow_html=True)
+                    st.checkbox(format_date_str(ev_match), value=st.session_state.get(f"chk_{ev_match['id']}", True), key=f"chk_{ev_match['id']}")
+                    st.markdown("</div>", unsafe_allow_html=True)
+        
+        if is_middle:
+            draw_event_col(2, '중간고사')
+            draw_event_col(3, '기말고사(중3)')
+            draw_event_col(4, '기말고사(중1,2)')
+            del_col = 5
+        else:
+            draw_event_col(2, '중간고사')
+            draw_event_col(3, '기말고사')
+            del_col = 4
+            
+        with cols[del_col]:
+            def delete_school_callback(name=s_name):
+                st.session_state.events = [e for e in st.session_state.events if e['name'] != name]
+            st.markdown("<div style='margin-top: 5px;'>", unsafe_allow_html=True)
+            st.button("삭제", key=f"del_{s_name}", on_click=delete_school_callback)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    # --- 고등학교 표 그리기 ---
+    if high_schools:
+        st.markdown("<br>", unsafe_allow_html=True)
+        h_cols = st.columns([0.5, 1.5, 3, 3, 1])
+        h_cols[1].markdown("<div style='text-align: center; color: #555;'><b>고등학교</b></div>", unsafe_allow_html=True)
+        h_cols[2].markdown("<div style='color: #555;'><b>중간고사</b></div>", unsafe_allow_html=True)
+        h_cols[3].markdown("<div style='color: #555;'><b>기말고사</b></div>", unsafe_allow_html=True)
+        h_cols[4].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
+        
+        for s_name, ev_list in high_schools.items():
+            render_school_row(s_name, ev_list, is_middle=False)
+            
+    # --- 중학교 표 그리기 ---
+    if mid_schools:
+        st.markdown("<br>", unsafe_allow_html=True)
+        m_cols = st.columns([0.5, 1.5, 2.5, 2.5, 2.5, 1])
+        m_cols[1].markdown("<div style='text-align: center; color: #555;'><b>중학교</b></div>", unsafe_allow_html=True)
+        m_cols[2].markdown("<div style='color: #555;'><b>중간고사</b></div>", unsafe_allow_html=True)
+        m_cols[3].markdown("<div style='color: #555;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
+        m_cols[4].markdown("<div style='color: #555;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
+        m_cols[5].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
+        
+        for s_name, ev_list in mid_schools.items():
+            render_school_row(s_name, ev_list, is_middle=True)
 else:
     st.info("등록된 학교 일정이 없습니다.")
+
 
 # === 달력 그리기 (계산된 HTML 맨 위로 렌더링) ===
 days_to_subtract = (st.session_state.cal_start_val.weekday() + 1) % 7
@@ -279,7 +345,7 @@ for week in range(num_weeks):
             cell_bg = "#E4FDA2"
         elif "중간고사" in exam_types:
             cell_bg = "#DFDEFC"
-        elif "기말고사" in exam_types:
+        elif any("기말고사" in t for t in exam_types):
             cell_bg = "#EFD0D0"
             
         day_color = "#e53935" if (i == 0 or is_holiday) else "#1e88e5" if i == 6 else "#555"
@@ -297,7 +363,7 @@ for week in range(num_weeks):
                 
         if "중간고사" in exam_types:
             cal_html += "<span style='font-size: 11px; font-weight: bold; color: #444; margin-left: 4px; letter-spacing: -0.5px;'>[중간고사]</span>"
-        if "기말고사" in exam_types:
+        if any("기말고사" in t for t in exam_types):
             cal_html += "<span style='font-size: 11px; font-weight: bold; color: #444; margin-left: 4px; letter-spacing: -0.5px;'>[기말고사]</span>"
             
         if is_holiday:
