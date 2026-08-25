@@ -135,13 +135,27 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# === 상단 여백 극한 축소 및 인쇄 페이지 넘김 CSS ===
+# 💡 [핵심] 상단 여백 축소 및 '스크롤바 숨김' + '페이지 넘김' 인쇄 CSS 적용
 st.markdown("""
     <style>
         .block-container { padding-top: 0rem !important; margin-top: 0rem !important; }
         header { display: none !important; }
+        
         @media print {
+            /* 1. 여백 조정 */
             @page { margin-top: 10mm; }
+            
+            /* 2. 스크롤바 완벽 숨김 (우측 및 하단 모두) */
+            ::-webkit-scrollbar {
+                display: none !important;
+            }
+            body {
+                -ms-overflow-style: none; /* IE and Edge */
+                scrollbar-width: none;    /* Firefox */
+                overflow: hidden !important; /* 전체 창 스크롤 방지 */
+            }
+            
+            /* 3. 특정 클래스(div) 앞에서 무조건 다음 페이지로 넘김 */
             .page-break { page-break-before: always !important; }
         }
     </style>
@@ -150,8 +164,11 @@ st.markdown("""
 # === [맨 위] 출력용 달력이 들어갈 컨테이너 ===
 cal_container = st.empty() 
 
-# 인쇄 시 여기서 다음 장(2페이지)으로 넘어갑니다
-st.markdown("<div class='page-break'><hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'></div>", unsafe_allow_html=True)
+# 💡 [핵심] 인쇄 시 여기서부터 다음 장(2페이지)으로 밀어버립니다!
+st.markdown("<div class='page-break'></div>", unsafe_allow_html=True)
+
+# (화면 구분선 - 인쇄 2페이지 맨 위에 나옴)
+st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
 
 # === [아래] 설정 및 입력 기능 ===
 st.subheader("⚙️ 달력 설정 및 일정 추가")
@@ -287,7 +304,6 @@ if st.session_state.events:
         st.markdown("<br>", unsafe_allow_html=True)
         h_cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
         h_cols[1].markdown("<div style='text-align: center; color: #555;'><b>고등학교</b></div>", unsafe_allow_html=True)
-        # 글자를 오른쪽으로 28px 당겨 정렬 맞춤
         h_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
         h_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사</b></div>", unsafe_allow_html=True)
         h_cols[7].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
@@ -301,7 +317,6 @@ if st.session_state.events:
         st.markdown("<br>", unsafe_allow_html=True)
         m_cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
         m_cols[1].markdown("<div style='text-align: center; color: #555;'><b>중학교</b></div>", unsafe_allow_html=True)
-        # 글자를 오른쪽으로 28px 당겨 정렬 맞춤
         m_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
         m_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
         m_cols[7].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
