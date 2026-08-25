@@ -135,7 +135,7 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# 💡 [핵심] 상단 여백 축소 및 '스크롤바 숨김' + '페이지 넘김' 인쇄 CSS 적용
+# === 💡 [수정됨] 인쇄용 CSS 완벽 적용 (Flexbox 해제 + 페이지 넘김) ===
 st.markdown("""
     <style>
         .block-container { padding-top: 0rem !important; margin-top: 0rem !important; }
@@ -145,18 +145,23 @@ st.markdown("""
             /* 1. 여백 조정 */
             @page { margin-top: 10mm; }
             
-            /* 2. 스크롤바 완벽 숨김 (우측 및 하단 모두) */
-            ::-webkit-scrollbar {
-                display: none !important;
-            }
-            body {
-                -ms-overflow-style: none; /* IE and Edge */
-                scrollbar-width: none;    /* Firefox */
-                overflow: hidden !important; /* 전체 창 스크롤 방지 */
+            /* 2. 스크롤바 숨김 */
+            ::-webkit-scrollbar { display: none !important; }
+            body { -ms-overflow-style: none; scrollbar-width: none; }
+            
+            /* 3. 💡 스트림릿 기본 Flex 레이아웃을 Block으로 변경해야 페이지 넘김이 정상 작동합니다! */
+            .block-container, div[data-testid="stVerticalBlock"] {
+                display: block !important;
             }
             
-            /* 3. 특정 클래스(div) 앞에서 무조건 다음 페이지로 넘김 */
-            .page-break { page-break-before: always !important; }
+            /* 4. 설정창을 다음 페이지로 강제 넘김 */
+            .page-break { 
+                page-break-before: always !important; 
+                break-before: page !important;
+            }
+            
+            /* 5. 혹시 사이드바가 열려있어도 인쇄시엔 완전 차단 */
+            section[data-testid="stSidebar"] { display: none !important; }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -164,7 +169,7 @@ st.markdown("""
 # === [맨 위] 출력용 달력이 들어갈 컨테이너 ===
 cal_container = st.empty() 
 
-# 💡 [핵심] 인쇄 시 여기서부터 다음 장(2페이지)으로 밀어버립니다!
+# 💡 [핵심] 인쇄 시 여기서부터 다음 장(2페이지)으로 훌쩍 밀어버립니다!
 st.markdown("<div class='page-break'></div>", unsafe_allow_html=True)
 
 # (화면 구분선 - 인쇄 2페이지 맨 위에 나옴)
