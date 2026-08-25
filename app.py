@@ -131,42 +131,46 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# --- CSS: 인쇄 시 달력 외 모든 요소 완전 숨김 ---
+# === 💡 [완벽 개선] 공간 압축 폭파 CSS (스크롤바 원천 차단) ===
 st.markdown("""
     <style>
-        .block-container { padding-top: 0rem !important; margin-top: 0rem !important; }
+        .block-container { padding-top: 1rem !important; margin-top: 0rem !important; }
         header, [data-testid="stHeader"] { display: none !important; }
         
         @media print {
+            /* 1. 기본 브라우저 여백 및 스크롤바 억제 */
             @page { margin-top: 10mm; margin-bottom: 10mm; }
             ::-webkit-scrollbar { display: none !important; }
-            html, body { overflow: visible !important; height: auto !important; }
-            
-            /* 모든 기본 요소 숨김 */
-            body * {
-                visibility: hidden !important;
+            html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+                overflow: hidden !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
-            /* 인쇄 전용 달력 영역만 표시 */
-            #printable-calendar, #printable-calendar * {
-                visibility: visible !important;
+            /* 2. 스트림릿 사이드바 완전 차단 */
+            [data-testid="stSidebar"] { display: none !important; }
+            
+            /* 3. ★ 핵심: 스트림릿의 모든 상자들(설정창, 목록 포함)의 물리적 공간을 0으로 폭파! */
+            .element-container { 
+                display: none !important; 
             }
             
-            #printable-calendar {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
+            /* 4. 딱 달력이 들어있는 상자 하나만 기적적으로 살려냄 (이러면 달력 높이만 인식되어 스크롤바 절대 안생김) */
+            .element-container:has(#printable-calendar) {
+                display: block !important;
             }
         }
     </style>
 """, unsafe_allow_html=True)
 
-# === 상단: 달력 렌더링 컨테이너 ===
-cal_container = st.empty()
+# === [맨 위] 달력이 들어갈 자리 마련 ===
+cal_container = st.empty() 
 
-# === 하단: 설정 및 입력 기능 UI ===
+# (화면 구분선)
 st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
+
+# === [아래] 설정 및 입력 기능 ===
 st.subheader("⚙️ 달력 설정 및 일정 추가")
 calendar_title = st.text_input("출력용 달력 제목을 입력하세요", "2026 2학기 학교별 시험 일정")
 
@@ -318,7 +322,7 @@ else:
     st.info("등록된 학교 일정이 없습니다.")
 
 
-# === 달력 계산 및 출력 (ID: printable-calendar 부여) ===
+# === 💡 달력 그리기 (ID: printable-calendar) ===
 days_to_subtract = (st.session_state.cal_start_val.weekday() + 1) % 7
 start_sunday = st.session_state.cal_start_val - timedelta(days=days_to_subtract)
 
