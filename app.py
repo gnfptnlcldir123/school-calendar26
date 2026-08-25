@@ -116,7 +116,6 @@ if 'events' not in st.session_state:
         {"id": str(uuid.uuid4()), "name": "장산중", "color": "#FFF2CC", "type": "기말고사(중1,2)", "start_date": date(2026, 12, 14), "end_date": date(2026, 12, 16)}
     ]
 
-# 개별 및 마스터 체크박스 키 초기화
 for ev in st.session_state.events:
     if f"chk_{ev['id']}" not in st.session_state:
         st.session_state[f"chk_{ev['id']}"] = True
@@ -135,200 +134,198 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# === 💡 [수정됨] 완벽한 인쇄용 마법 CSS (설정창 전체 숨김) ===
+# === 💡 [완벽 개선] 스크롤바 원천 차단 및 보따리(컨테이너) 통째로 숨김 CSS ===
 st.markdown("""
     <style>
-        /* 웹 화면 상단 여백 축소 */
         .block-container { padding-top: 0rem !important; margin-top: 0rem !important; }
         header, [data-testid="stHeader"] { display: none !important; }
         
         @media print {
-            /* 1. 사이드바 완벽 차단 */
+            /* 1. 여백 조정 */
+            @page { margin-top: 10mm; }
+            
+            /* 2. 브라우저 스크롤 기능 자체를 꺼버려서 우측 회색 스크롤바 완전 제거 */
+            ::-webkit-scrollbar { display: none !important; }
+            html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
+                overflow: visible !important;
+                height: auto !important;
+            }
+            
+            /* 3. 사이드바 메뉴 완전 숨김 */
             [data-testid="stSidebar"] { display: none !important; }
             
-            /* 2. 여백 및 스크롤바 제거 */
-            @page { margin-top: 10mm; }
-            ::-webkit-scrollbar { display: none !important; }
-            
-            /* 3. 달력 아래의 모든 설정/목록 창을 통째로 투명화 (가장 확실한 방법) */
-            /* #hide-in-print 마커를 포함한 블록과, 그 뒤에 나오는 모든 블록들을 숨깁니다. */
-            .element-container:has(#hide-in-print),
-            .element-container:has(#hide-in-print) ~ .element-container {
+            /* 4. 'hide-in-print' 마커가 들어있는 '보따리(컨테이너)' 전체를 찾아내서 통째로 투명화 */
+            .element-container:has(#hide-in-print) {
                 display: none !important;
             }
         }
     </style>
 """, unsafe_allow_html=True)
 
-# === [맨 위] 출력용 달력이 들어갈 컨테이너 ===
+# === [맨 위] 출력용 달력이 들어갈 곳 ===
 cal_container = st.empty() 
 
-# 💡 [핵심] 인쇄할 때 여기서부터 밑으로는 전부 사라지게 만드는 투명 마커입니다!
-st.markdown("<div id='hide-in-print'></div>", unsafe_allow_html=True)
+# =========================================================================
+# === 💡 [핵심] 여기서부터 나오는 모든 UI를 'ui_container' 라는 보따리로 묶습니다.
+ui_container = st.container()
 
-# (화면 구분선)
-st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
+with ui_container:
+    # 이 마커가 보따리 안에 들어있기 때문에, 인쇄 시 보따리 전체가 사라집니다!
+    st.markdown("<div id='hide-in-print'></div>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
 
-# === [아래] 설정 및 입력 기능 ===
-st.subheader("⚙️ 달력 설정 및 일정 추가")
-calendar_title = st.text_input("출력용 달력 제목을 입력하세요", "2026 2학기 학교별 시험 일정")
+    st.subheader("⚙️ 달력 설정 및 일정 추가")
+    calendar_title = st.text_input("출력용 달력 제목을 입력하세요", "2026 2학기 학교별 시험 일정")
 
-cal_col1, cal_col2 = st.columns([1, 1])
-with cal_col1:
-    cal_start = st.date_input("달력 시작 기준일을 선택하세요", key="cal_start_val")
-with cal_col2:
-    num_weeks = st.radio("달력 표시 기간", [4, 8, 12], format_func=lambda x: f"{x}주 보기", horizontal=True)
+    cal_col1, cal_col2 = st.columns([1, 1])
+    with cal_col1:
+        cal_start = st.date_input("달력 시작 기준일을 선택하세요", key="cal_start_val")
+    with cal_col2:
+        num_weeks = st.radio("달력 표시 기간", [4, 8, 12], format_func=lambda x: f"{x}주 보기", horizontal=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-add_col1, add_col2 = st.columns([1, 1])
-with add_col1:
-    school_name = st.text_input("새로운 학교 이름을 입력하세요", "사동고")
-    exam_type = st.radio("시험 종류", ["중간고사", "기말고사", "기말고사(중3)", "기말고사(중1,2)"], horizontal=True)
-    
-    with st.popover("🎨 색상 팔레트 열기 (클릭)"):
-        st.write("▼ 아래 실제 색상을 확인하고 고르세요")
-        palette_html = "<div style='display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;'>"
-        for name, hex_code in COLORS.items():
-            palette_html += f"<div style='text-align: center;'><div title='{name}' style='width: 30px; height: 30px; background-color: {hex_code}; border-radius: 50%; border: 1px solid #aaa; margin: 0 auto; box-shadow: 1px 1px 3px rgba(0,0,0,0.2);'></div><span style='font-size: 10px;'>{name}</span></div>"
-        palette_html += "</div>"
-        st.markdown(palette_html, unsafe_allow_html=True)
+    add_col1, add_col2 = st.columns([1, 1])
+    with add_col1:
+        school_name = st.text_input("새로운 학교 이름을 입력하세요", "사동고")
+        exam_type = st.radio("시험 종류", ["중간고사", "기말고사", "기말고사(중3)", "기말고사(중1,2)"], horizontal=True)
         
-        selected_name = st.radio("색상 선택", list(COLORS.keys()), horizontal=True, label_visibility="collapsed")
-        st.session_state.selected_color = COLORS[selected_name]
-
-    st.markdown(f"<div style='display: inline-block; width: 25px; height: 25px; background-color: {st.session_state.selected_color}; border-radius: 50%; border: 1px solid #bbb; margin-bottom: 10px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1);'></div> <span style='vertical-align: top; font-weight: bold; margin-left: 8px;'>현재 선택됨</span>", unsafe_allow_html=True)
-
-with add_col2:
-    date_range = st.date_input("시험 기간 (시작일 ~ 종료일)", value=(date(2026, 12, 10), date(2026, 12, 15)))
-    
-    if st.button("달력에 추가하기", use_container_width=True):
-        if len(date_range) == 2:
-            start_date, end_date = date_range
-            new_id = str(uuid.uuid4())
-            st.session_state.events.append({
-                "id": new_id, "name": school_name, "color": st.session_state.selected_color,
-                "type": exam_type, "start_date": start_date, "end_date": end_date
-            })
-            st.session_state[f"chk_{new_id}"] = True
-            st.session_state[f"master_{school_name}"] = True
-            st.success(f"[{school_name}] 일정 추가 완료!")
-        else:
-            st.warning("시작일과 종료일을 모두 선택해 주세요.")
-
-st.divider()
-
-# --- 하단 글로벌 필터 및 목록 관리 ---
-c_hdr, c_high, c_mid, c_mock = st.columns([3, 1.5, 1.5, 2])
-with c_hdr:
-    st.subheader("📋 전체 등록된 학교 시험 일정")
-with c_high:
-    st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
-    st.checkbox("🏫 고등학교", key="show_high", on_change=toggle_high_schools)
-    st.markdown("</div>", unsafe_allow_html=True)
-with c_mid:
-    st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
-    st.checkbox("🎒 중학교", key="show_mid", on_change=toggle_mid_schools)
-    st.markdown("</div>", unsafe_allow_html=True)
-with c_mock:
-    st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
-    st.checkbox("📝 수능, 모의고사", key="show_mocks")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-if st.session_state.events:
-    def get_weekday_kr(d):
-        return ["월", "화", "수", "목", "금", "토", "일"][d.weekday()]
-
-    def format_date_str(ev):
-        start_str = f"{ev['start_date'].strftime('%Y-%m-%d')}({get_weekday_kr(ev['start_date'])})"
-        end_str = f"{ev['end_date'].strftime('%m-%d')}({get_weekday_kr(ev['end_date'])})"
-        return f"{start_str} ~ {end_str}"
-
-    schools = {}
-    for ev in st.session_state.events:
-        schools.setdefault(ev['name'], []).append(ev)
-        
-    high_schools = {k: v for k, v in schools.items() if k.endswith('고')}
-    mid_schools = {k: v for k, v in schools.items() if k.endswith('중')}
-
-    def render_school_row(s_name, ev_list, is_middle=False):
-        if is_middle:
-            cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
-        else:
-            cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
+        with st.popover("🎨 색상 팔레트 열기 (클릭)"):
+            st.write("▼ 아래 실제 색상을 확인하고 고르세요")
+            palette_html = "<div style='display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;'>"
+            for name, hex_code in COLORS.items():
+                palette_html += f"<div style='text-align: center;'><div title='{name}' style='width: 30px; height: 30px; background-color: {hex_code}; border-radius: 50%; border: 1px solid #aaa; margin: 0 auto; box-shadow: 1px 1px 3px rgba(0,0,0,0.2);'></div><span style='font-size: 10px;'>{name}</span></div>"
+            palette_html += "</div>"
+            st.markdown(palette_html, unsafe_allow_html=True)
             
-        # 1. 일괄 체크박스 (on_change 연결)
-        with cols[0]:
-            st.markdown("<div style='margin-top: 14px;'>", unsafe_allow_html=True)
-            st.checkbox("", key=f"master_{s_name}", on_change=toggle_school, args=(s_name, not is_middle), label_visibility="collapsed")
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-        # 2. 학교 이름 배지
-        with cols[1]:
-            color = ev_list[0]['color']
-            st.markdown(f"<div style='background-color:{color}; padding: 6px; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 8px; color: black;'>{s_name}</div>", unsafe_allow_html=True)
-        
-        # 3. 일정 렌더링 함수 (on_change 연결)
-        def draw_event_col(col_idx, ev_type_match):
-            ev_match = next((e for e in ev_list if e['type'] == ev_type_match or (ev_type_match=='기말고사' and e['type'] in ['기말고사', '기말고사(중3)', '기말고사(중1,2)'] and not is_middle)), None)
-            if ev_match:
-                with cols[col_idx]:
-                    st.markdown("<div style='margin-top: 6px;'>", unsafe_allow_html=True)
-                    st.checkbox(format_date_str(ev_match), key=f"chk_{ev_match['id']}", on_change=toggle_individual, args=(s_name, not is_middle))
-                    st.markdown("</div>", unsafe_allow_html=True)
-        
-        if is_middle:
-            draw_event_col(3, '중간고사')
-            draw_event_col(5, '기말고사(중3)')
-            draw_event_col(7, '기말고사(중1,2)')
-            del_col = 9
-        else:
-            draw_event_col(3, '중간고사')
-            draw_event_col(5, '기말고사')
-            del_col = 7
-            
-        # 4. 삭제 버튼
-        with cols[del_col]:
-            def delete_school_callback(name=s_name):
-                st.session_state.events = [e for e in st.session_state.events if e['name'] != name]
-            st.markdown("<div style='margin-top: 5px;'>", unsafe_allow_html=True)
-            st.button("삭제", key=f"del_{s_name}", on_click=delete_school_callback)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-        # 5. 각 학교별 구분선
-        st.markdown("<hr style='margin: 8px 0; border: 0; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
+            selected_name = st.radio("색상 선택", list(COLORS.keys()), horizontal=True, label_visibility="collapsed")
+            st.session_state.selected_color = COLORS[selected_name]
 
-    # --- 고등학교 표 그리기 ---
-    if high_schools:
-        st.markdown("<br>", unsafe_allow_html=True)
-        h_cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
-        h_cols[1].markdown("<div style='text-align: center; color: #555;'><b>고등학교</b></div>", unsafe_allow_html=True)
-        h_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
-        h_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사</b></div>", unsafe_allow_html=True)
-        h_cols[7].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
-        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
+        st.markdown(f"<div style='display: inline-block; width: 25px; height: 25px; background-color: {st.session_state.selected_color}; border-radius: 50%; border: 1px solid #bbb; margin-bottom: 10px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1);'></div> <span style='vertical-align: top; font-weight: bold; margin-left: 8px;'>현재 선택됨</span>", unsafe_allow_html=True)
+
+    with add_col2:
+        date_range = st.date_input("시험 기간 (시작일 ~ 종료일)", value=(date(2026, 12, 10), date(2026, 12, 15)))
         
-        for s_name, ev_list in high_schools.items():
-            render_school_row(s_name, ev_list, is_middle=False)
+        if st.button("달력에 추가하기", use_container_width=True):
+            if len(date_range) == 2:
+                start_date, end_date = date_range
+                new_id = str(uuid.uuid4())
+                st.session_state.events.append({
+                    "id": new_id, "name": school_name, "color": st.session_state.selected_color,
+                    "type": exam_type, "start_date": start_date, "end_date": end_date
+                })
+                st.session_state[f"chk_{new_id}"] = True
+                st.session_state[f"master_{school_name}"] = True
+                st.success(f"[{school_name}] 일정 추가 완료!")
+            else:
+                st.warning("시작일과 종료일을 모두 선택해 주세요.")
+
+    st.divider()
+
+    c_hdr, c_high, c_mid, c_mock = st.columns([3, 1.5, 1.5, 2])
+    with c_hdr:
+        st.subheader("📋 전체 등록된 학교 시험 일정")
+    with c_high:
+        st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
+        st.checkbox("🏫 고등학교", key="show_high", on_change=toggle_high_schools)
+        st.markdown("</div>", unsafe_allow_html=True)
+    with c_mid:
+        st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
+        st.checkbox("🎒 중학교", key="show_mid", on_change=toggle_mid_schools)
+        st.markdown("</div>", unsafe_allow_html=True)
+    with c_mock:
+        st.markdown("<div style='margin-top: 15px;'>", unsafe_allow_html=True)
+        st.checkbox("📝 수능, 모의고사", key="show_mocks")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    if st.session_state.events:
+        def get_weekday_kr(d):
+            return ["월", "화", "수", "목", "금", "토", "일"][d.weekday()]
+
+        def format_date_str(ev):
+            start_str = f"{ev['start_date'].strftime('%Y-%m-%d')}({get_weekday_kr(ev['start_date'])})"
+            end_str = f"{ev['end_date'].strftime('%m-%d')}({get_weekday_kr(ev['end_date'])})"
+            return f"{start_str} ~ {end_str}"
+
+        schools = {}
+        for ev in st.session_state.events:
+            schools.setdefault(ev['name'], []).append(ev)
             
-    # --- 중학교 표 그리기 ---
-    if mid_schools:
-        st.markdown("<br>", unsafe_allow_html=True)
-        m_cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
-        m_cols[1].markdown("<div style='text-align: center; color: #555;'><b>중학교</b></div>", unsafe_allow_html=True)
-        m_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
-        m_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
-        m_cols[7].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
-        m_cols[9].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
-        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
-        
-        for s_name, ev_list in mid_schools.items():
-            render_school_row(s_name, ev_list, is_middle=True)
-else:
-    st.info("등록된 학교 일정이 없습니다.")
+        high_schools = {k: v for k, v in schools.items() if k.endswith('고')}
+        mid_schools = {k: v for k, v in schools.items() if k.endswith('중')}
+
+        def render_school_row(s_name, ev_list, is_middle=False):
+            if is_middle:
+                cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
+            else:
+                cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
+                
+            with cols[0]:
+                st.markdown("<div style='margin-top: 14px;'>", unsafe_allow_html=True)
+                st.checkbox("", key=f"master_{s_name}", on_change=toggle_school, args=(s_name, not is_middle), label_visibility="collapsed")
+                st.markdown("</div>", unsafe_allow_html=True)
+                
+            with cols[1]:
+                color = ev_list[0]['color']
+                st.markdown(f"<div style='background-color:{color}; padding: 6px; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 8px; color: black;'>{s_name}</div>", unsafe_allow_html=True)
+            
+            def draw_event_col(col_idx, ev_type_match):
+                ev_match = next((e for e in ev_list if e['type'] == ev_type_match or (ev_type_match=='기말고사' and e['type'] in ['기말고사', '기말고사(중3)', '기말고사(중1,2)'] and not is_middle)), None)
+                if ev_match:
+                    with cols[col_idx]:
+                        st.markdown("<div style='margin-top: 6px;'>", unsafe_allow_html=True)
+                        st.checkbox(format_date_str(ev_match), key=f"chk_{ev_match['id']}", on_change=toggle_individual, args=(s_name, not is_middle))
+                        st.markdown("</div>", unsafe_allow_html=True)
+            
+            if is_middle:
+                draw_event_col(3, '중간고사')
+                draw_event_col(5, '기말고사(중3)')
+                draw_event_col(7, '기말고사(중1,2)')
+                del_col = 9
+            else:
+                draw_event_col(3, '중간고사')
+                draw_event_col(5, '기말고사')
+                del_col = 7
+                
+            with cols[del_col]:
+                def delete_school_callback(name=s_name):
+                    st.session_state.events = [e for e in st.session_state.events if e['name'] != name]
+                st.markdown("<div style='margin-top: 5px;'>", unsafe_allow_html=True)
+                st.button("삭제", key=f"del_{s_name}", on_click=delete_school_callback)
+                st.markdown("</div>", unsafe_allow_html=True)
+                
+            st.markdown("<hr style='margin: 8px 0; border: 0; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
+
+        if high_schools:
+            st.markdown("<br>", unsafe_allow_html=True)
+            h_cols = st.columns([0.3, 1.5, 0.8, 2.5, 0.8, 2.5, 0.6, 1.0])
+            h_cols[1].markdown("<div style='text-align: center; color: #555;'><b>고등학교</b></div>", unsafe_allow_html=True)
+            h_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
+            h_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사</b></div>", unsafe_allow_html=True)
+            h_cols[7].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
+            
+            for s_name, ev_list in high_schools.items():
+                render_school_row(s_name, ev_list, is_middle=False)
+                
+        if mid_schools:
+            st.markdown("<br>", unsafe_allow_html=True)
+            m_cols = st.columns([0.3, 1.5, 0.5, 2.2, 0.4, 2.2, 0.4, 2.2, 0.3, 1.0])
+            m_cols[1].markdown("<div style='text-align: center; color: #555;'><b>중학교</b></div>", unsafe_allow_html=True)
+            m_cols[3].markdown("<div style='color: #555; padding-left: 28px;'><b>중간고사</b></div>", unsafe_allow_html=True)
+            m_cols[5].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중3)</b></div>", unsafe_allow_html=True)
+            m_cols[7].markdown("<div style='color: #555; padding-left: 28px;'><b>기말고사(중1,2)</b></div>", unsafe_allow_html=True)
+            m_cols[9].markdown("<div style='text-align: center; color: #555;'><b>삭제</b></div>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 2px solid #bbb;'>", unsafe_allow_html=True)
+            
+            for s_name, ev_list in mid_schools.items():
+                render_school_row(s_name, ev_list, is_middle=True)
+    else:
+        st.info("등록된 학교 일정이 없습니다.")
+# === 보따리(ui_container) 끝! ==============================================
 
 
-# === 달력 그리기 (계산된 HTML 맨 위로 렌더링) ===
+# === 달력 그리기 (맨 위 컨테이너에 전달되므로 보따리 밖에 있습니다) ===
 days_to_subtract = (st.session_state.cal_start_val.weekday() + 1) % 7
 start_sunday = st.session_state.cal_start_val - timedelta(days=days_to_subtract)
 
