@@ -135,33 +135,27 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# === 💡 [수정됨] 인쇄용 CSS 완벽 적용 (Flexbox 해제 + 페이지 넘김) ===
+# === 💡 [수정됨] 완벽한 인쇄용 마법 CSS (설정창 전체 숨김) ===
 st.markdown("""
     <style>
+        /* 웹 화면 상단 여백 축소 */
         .block-container { padding-top: 0rem !important; margin-top: 0rem !important; }
-        header { display: none !important; }
+        header, [data-testid="stHeader"] { display: none !important; }
         
         @media print {
-            /* 1. 여백 조정 */
+            /* 1. 사이드바 완벽 차단 */
+            [data-testid="stSidebar"] { display: none !important; }
+            
+            /* 2. 여백 및 스크롤바 제거 */
             @page { margin-top: 10mm; }
-            
-            /* 2. 스크롤바 숨김 */
             ::-webkit-scrollbar { display: none !important; }
-            body { -ms-overflow-style: none; scrollbar-width: none; }
             
-            /* 3. 💡 스트림릿 기본 Flex 레이아웃을 Block으로 변경해야 페이지 넘김이 정상 작동합니다! */
-            .block-container, div[data-testid="stVerticalBlock"] {
-                display: block !important;
+            /* 3. 달력 아래의 모든 설정/목록 창을 통째로 투명화 (가장 확실한 방법) */
+            /* #hide-in-print 마커를 포함한 블록과, 그 뒤에 나오는 모든 블록들을 숨깁니다. */
+            .element-container:has(#hide-in-print),
+            .element-container:has(#hide-in-print) ~ .element-container {
+                display: none !important;
             }
-            
-            /* 4. 설정창을 다음 페이지로 강제 넘김 */
-            .page-break { 
-                page-break-before: always !important; 
-                break-before: page !important;
-            }
-            
-            /* 5. 혹시 사이드바가 열려있어도 인쇄시엔 완전 차단 */
-            section[data-testid="stSidebar"] { display: none !important; }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -169,10 +163,10 @@ st.markdown("""
 # === [맨 위] 출력용 달력이 들어갈 컨테이너 ===
 cal_container = st.empty() 
 
-# 💡 [핵심] 인쇄 시 여기서부터 다음 장(2페이지)으로 훌쩍 밀어버립니다!
-st.markdown("<div class='page-break'></div>", unsafe_allow_html=True)
+# 💡 [핵심] 인쇄할 때 여기서부터 밑으로는 전부 사라지게 만드는 투명 마커입니다!
+st.markdown("<div id='hide-in-print'></div>", unsafe_allow_html=True)
 
-# (화면 구분선 - 인쇄 2페이지 맨 위에 나옴)
+# (화면 구분선)
 st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
 
 # === [아래] 설정 및 입력 기능 ===
