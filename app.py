@@ -131,32 +131,41 @@ COLORS = {
     "회색": "#EFEFEF", "살구": "#F9CB9C", "민트": "#B6D7A8", "베이지": "#FFF9E6"
 }
 
-# === 💡 [완벽 개선] 공간 압축 폭파 CSS (스크롤바 원천 차단) ===
+# === 💡 [최종 완벽판] 팝오버 확인 사살 & 스크롤바 원천 차단 CSS ===
 st.markdown("""
     <style>
         .block-container { padding-top: 1rem !important; margin-top: 0rem !important; }
         header, [data-testid="stHeader"] { display: none !important; }
         
         @media print {
-            /* 1. 기본 브라우저 여백 및 스크롤바 억제 */
+            /* 1. 기본 브라우저 여백 억제 */
             @page { margin-top: 10mm; margin-bottom: 10mm; }
+            
+            /* 2. 스크롤바 완전 숨김 및 창 크기 고정 */
             ::-webkit-scrollbar { display: none !important; }
-            html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+            html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
                 overflow: hidden !important;
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
-            /* 2. 스트림릿 사이드바 완전 차단 */
+            /* 3. 스트림릿 사이드바 완전 차단 */
             [data-testid="stSidebar"] { display: none !important; }
             
-            /* 3. ★ 핵심: 스트림릿의 모든 상자들(설정창, 목록 포함)의 물리적 공간을 0으로 폭파! */
+            /* 4. ★ 핵심: 팝오버(색상 팔레트), 구분선, 버튼 등 찌꺼기 UI들 명시적 킬(Kill)! */
+            [data-testid="stPopover"], 
+            [data-testid="stHorizontalBlock"],
+            hr {
+                display: none !important;
+            }
+            
+            /* 5. 달력 외의 모든 컨테이너 숨김 처리 */
             .element-container { 
                 display: none !important; 
             }
             
-            /* 4. 딱 달력이 들어있는 상자 하나만 기적적으로 살려냄 (이러면 달력 높이만 인식되어 스크롤바 절대 안생김) */
+            /* 6. 오직 달력이 들어있는 컨테이너 단 1개만 부활시킴 */
             .element-container:has(#printable-calendar) {
                 display: block !important;
             }
@@ -167,10 +176,10 @@ st.markdown("""
 # === [맨 위] 달력이 들어갈 자리 마련 ===
 cal_container = st.empty() 
 
-# (화면 구분선)
+# =========================================================================
+# === 아래 UI 영역 ===
 st.markdown("<hr style='margin-top:20px; margin-bottom:20px; border-top: 2px dashed #aaa;'>", unsafe_allow_html=True)
 
-# === [아래] 설정 및 입력 기능 ===
 st.subheader("⚙️ 달력 설정 및 일정 추가")
 calendar_title = st.text_input("출력용 달력 제목을 입력하세요", "2026 2학기 학교별 시험 일정")
 
@@ -187,6 +196,7 @@ with add_col1:
     school_name = st.text_input("새로운 학교 이름을 입력하세요", "사동고")
     exam_type = st.radio("시험 종류", ["중간고사", "기말고사", "기말고사(중3)", "기말고사(중1,2)"], horizontal=True)
     
+    # 🔴 문제의 팝오버: 인쇄 시 이 녀석을 포함한 모든 팝오버가 사라집니다!
     with st.popover("🎨 색상 팔레트 열기 (클릭)"):
         st.write("▼ 아래 실제 색상을 확인하고 고르세요")
         palette_html = "<div style='display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;'>"
@@ -219,7 +229,6 @@ with add_col2:
 
 st.divider()
 
-# --- 하단 글로벌 필터 및 목록 관리 ---
 c_hdr, c_high, c_mid, c_mock = st.columns([3, 1.5, 1.5, 2])
 with c_hdr:
     st.subheader("📋 전체 등록된 학교 시험 일정")
